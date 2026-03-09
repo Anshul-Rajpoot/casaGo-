@@ -21,7 +21,7 @@ Before you begin, make sure you have the following installed on your system:
 1. Clone the casaGo repository from GitHub:
 
    ```
-   git clone https://github.com/gawandeabhishek/casaGo-Major-Project.git
+   git clone https://github.com/Anshul-Rajpoot/casaGo-.git
    ```
 
 2. Set up the database:
