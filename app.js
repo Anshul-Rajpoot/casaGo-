@@ -47,25 +47,21 @@ const store = MongoStore.create({
     touchAfter: 24 * 3600,
 });
 
-store.on("error", () => {
+store.on("error", (err) => {
     console.log("ERROR in MONGO SESSION STORE", err);
-})
+});
 
 const sessionOption = {
-    store:store,
+    store: store,
     secret: process.env.SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {
         expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        httpOnly:true,
+        httpOnly: true,
     },
 };
-
-// app.get("/", (req, res) => {
-//     res.send("i m root");
-// });
 
 app.use(session(sessionOption));
 app.use(flash());
@@ -84,44 +80,30 @@ app.use((req, res, next) => {
     next();
 });
 
-// app.get("/demouser", async (req, res) => {
-//     let fakeUser = new User({
-//         email: "student@gmail.com",
-//         username: "delta-student"
-//     });
+/* ---------- HOMEPAGE ROUTE FIX ---------- */
+app.get("/", (req, res) => {
+    res.redirect("/listings");
+});
 
-//     let registeredUser = await User.register(fakeUser, "helloworld");
-//     res.send(registeredUser);
-// });
-
+/* ---------- ROUTERS ---------- */
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
 
-
-// app.get("/testlisting", async (req, res) => {
-//     let samplelisting = new Listing({
-//         title: "my new villa",
-//         description: "by the beach",
-//         price: 1200,
-//         location: "Calangote, Goa",
-//         country: "India"
-//     });
-//     await samplelisting.save()
-//     console.log("sample was saved");
-//     res.send("succesfully tested");
-// });
-
+/* ---------- 404 HANDLER ---------- */
 app.all("*", (req, res, next) => {
     next(new ExpressError(404, "page not found"));
 });
 
+/* ---------- ERROR HANDLER ---------- */
 app.use((err, req, res, next) => {
     let { statusCode = 500, message = "Something went wrong!" } = err;
-    res.status(statusCode).render("error.ejs",{message});
-    // res.status(statusCode).send(message);
+    res.status(statusCode).render("error.ejs", { message });
 });
 
-app.listen(8080, () => {
-    console.log("server is listening at 8080 port");
+/* ---------- SERVER ---------- */
+const port = process.env.PORT || 8080;
+
+app.listen(port, () => {
+    console.log(`server running on port ${port}`);
 });
