@@ -2,9 +2,27 @@
 const { response } = require("express");
 const Listing = require("../models/listing.js");
 
+function escapeRegex(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 module.exports.index = async (req, res) => {
-    const allListings = await Listing.find({});
-    res.render("listings/index.ejs", { allListings });
+    const { q } = req.query;
+    let filter = {};
+
+    if (q && q.trim() !== "") {
+        const searchTerm = escapeRegex(q.trim());
+        filter = {
+            $or: [
+                { title: { $regex: searchTerm, $options: "i" } },
+                { location: { $regex: searchTerm, $options: "i" } },
+                { country: { $regex: searchTerm, $options: "i" } },
+            ],
+        };
+    }
+
+    const allListings = await Listing.find(filter);
+    res.render("listings/index.ejs", { allListings, query: q || "" });
 };
 
 module.exports.renderNewForm = (req, res) => {
